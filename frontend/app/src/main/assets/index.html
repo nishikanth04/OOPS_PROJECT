@@ -607,6 +607,92 @@
   color: var(--cream, #f4efe6);
   font-weight: 600;
 }
+
+/* =========================================================
+   Interactive Map Modal (Web & Desktop Fallback)
+   ========================================================= */
+.map-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.map-modal.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.map-card {
+  background: var(--ink-2, #12151a);
+  border: 1px solid var(--panel-border-hi, rgba(244, 239, 230, 0.22));
+  border-radius: 20px;
+  padding: 20px;
+  width: 90%;
+  max-width: 850px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+}
+
+.map-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border, rgba(244, 239, 230, 0.12));
+}
+
+/* =========================================================
+   Route & Time Form Modal Styling
+   ========================================================= */
+.route-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.route-modal.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.route-card {
+  background: var(--ink-2, #12151a);
+  border: 1px solid var(--panel-border-hi, rgba(244, 239, 230, 0.22));
+  border-radius: 20px;
+  padding: 26px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--gold, #f0b23e);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 </style>
 </head>
 <body>
@@ -714,6 +800,12 @@
           <li data-i18n="f1Bullet2">Load status flags for overcrowding or breakdowns</li>
           <li data-i18n="f1Bullet3">ETA that updates as traffic changes</li>
         </ul>
+        <!-- Centered Open Live Map Button (Identical styling to Scan Ticket QR) -->
+<div style="display: flex; justify-content: center; width: 100%; margin-top: 24px;">
+  <button class="btn btn-primary" onclick="launchLiveMap()" style="margin: 0 auto;" data-i18n="btnOpenMap">
+    🗺️ Open Live Map
+  </button>
+</div>
       </div>
       <div class="feature-card reveal d1">
         <div class="num">02 / Boarding</div>
@@ -904,7 +996,8 @@ const translations = {
     step3Label: "Seen",
     step3Desc: "Read-receipt updates in real time",
     step4Label: "Resolved",
-    step4Desc: "Passenger confirms the issue is closed"
+    step4Desc: "Passenger confirms the issue is closed",
+    btnOpenMap: "🗺️ Open Live Map"
   },
   ml: {
     brandName: "സ്മാർട്ട് ട്രാൻസിറ്റ്",
@@ -953,7 +1046,8 @@ const translations = {
     step3Label: "കണ്ടു",
     step3Desc: "റീഡ്-റസീറ്റുകൾ തത്സമയം അപ്ഡേറ്റ് ചെയ്യുന്നു",
     step4Label: "പരിഹരിച്ചു",
-    step4Desc: "പ്രശ്നം പരിഹരിച്ചതായി യാത്രക്കാരൻ സ്ഥിരീകരിക്കുന്നു"
+    step4Desc: "പ്രശ്നം പരിഹരിച്ചതായി യാത്രക്കാരൻ സ്ഥിരീകരിക്കുന്നു",
+    btnOpenMap: "🗺️ ലൈവ് മാപ്പ് തുറക്കുക"
   },
   hi: {
     brandName: "स्मार्ट ट्रांजिट",
@@ -1000,7 +1094,8 @@ const translations = {
     step3Label: "देखा गया",
     step3Desc: "वास्तविक समय में स्टेटस अपडेट",
     step4Label: "हल किया गया",
-    step4Desc: "यात्री पुष्टि करता है कि मामला बंद हो गया है"
+    step4Desc: "यात्री पुष्टि करता है कि मामला बंद हो गया है",
+    btnOpenMap: "🗺️ लाइव मानचित्र खोलें"
   },
   ta: {
     brandName: "ஸ்மார்ட் ட்ரான்ஸிட்",
@@ -1049,7 +1144,8 @@ const translations = {
     step3Label: "பார்க்கப்பட்டது",
     step3Desc: "நிகழ்நேர நிலை புதுப்பிப்புகள்",
     step4Label: "தீர்க்கப்பட்டது",
-    step4Desc: "பிரச்சனை முடிந்தது என்பதை பயணி உறுதிப்படுத்துகிறார்"
+    step4Desc: "பிரச்சனை முடிந்தது என்பதை பயணி உறுதிப்படுத்துகிறார்",
+    btnOpenMap: "🗺️ நேரலை வரைபடத்தைத் திறக்கவும்"
   },
   kn: {
     brandName: "ಸ್ಮಾರ್ಟ್ ಟ್ರಾನ್ಸಿಟ್",
@@ -1098,7 +1194,9 @@ const translations = {
     step3Label: "ನೋಡಲಾಗಿದೆ",
     step3Desc: "ರಿಯಲ್-ಟೈಮ್ ಸ್ಥಿತಿ ನವೀಕರಣಗಳು",
     step4Label: "ಪರಿಹರಿಸಲಾಗಿದೆ",
-    step4Desc: "ಸಮಸ್ಯೆ ಮುಗಿದಿದೆ ಎಂದು ಪ್ರಯಾಣಿಕರು ದೃಢೀಕರಿಸುತ್ತಾರೆ"
+    step4Desc: "ಸಮಸ್ಯೆ ಮುಗಿದಿದೆ ಎಂದು ಪ್ರಯಾಣಿಕರು ದೃಢೀಕರಿಸುತ್ತಾರೆ",
+    btnOpenMap: "🗺️ ಲೈವ್ ನಕ್ಷೆಯನ್ನು ತೆರೆಯಿರಿ",
+    btnOpenMap: "🗺️ লাইভ ম্যাপ খুলুন"
   },
   bn: {
     brandName: "স্মার্ট ট্রানজিট",
@@ -1421,5 +1519,144 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 </script>
+<!-- Inside Feature Card 01: Live Tracking & Navigation -->
+<!-- Interactive Kerala Live Map Modal -->
+<<!-- Interactive Live Map Modal with Tracked Bus Info Header -->
+<div class="map-modal" id="mapModal" onclick="if(event.target === this) closeMapModal()">
+  <div class="map-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:22px;">🗺️</span>
+        <h3 style="margin:0; color:var(--cream);" data-i18n="mapModalTitle">KSRTC Live Bus Tracking</h3>
+      </div>
+      <button onclick="closeMapModal()" style="background:none; border:none; color:var(--cream); font-size:26px; cursor:pointer;">&times;</button>
+    </div>
+
+    <!-- Live Tracked Bus Selection Details Bar -->
+    <div id="trackedBusInfo" style="background: var(--panel, rgba(244,239,230,0.08)); border: 1px solid var(--gold, #f0b23e); padding: 10px 16px; border-radius: 10px; margin-bottom: 12px; color: var(--cream); font-size: 13px; display: flex; align-items: center; justify-content: space-between;">
+      <span>🚌 <strong>Route:</strong> <span id="routeText">TVM → Ernakulam</span></span>
+      <span>⏰ <strong>Boarding Time:</strong> <span id="timeText">10:30 AM</span></span>
+      <span style="color: var(--teal, #39b6a0); font-weight: 600;">● Live GPS Active</span>
+    </div>
+
+    <!-- Embedded Map -->
+    <iframe 
+      class="map-frame"
+      src="https://maps.google.com/maps?q=Kerala,India&t=&z=9&ie=UTF8&iwloc=&output=embed" 
+      frameborder="0" 
+      scrolling="no">
+    </iframe>
+  </div>
+</div>
+
+<script>
+ // 1. Opens the Route & Time Form Modal when clicking "Open Live Map"
+function launchLiveMap() {
+  const routeModal = document.getElementById('routeModal');
+  if (routeModal) {
+    routeModal.classList.add('active');
+  }
+}
+
+function closeRouteModal() {
+  const routeModal = document.getElementById('routeModal');
+  if (routeModal) {
+    routeModal.classList.remove('active');
+  }
+}
+
+// 2. Processes form submission & opens targeted Map
+function handleRouteSearch(event) {
+  event.preventDefault();
+
+  const from = document.getElementById('fromLocation').value;
+  const to = document.getElementById('toLocation').value;
+  const time = document.getElementById('travelTime').value;
+
+  if (from === to) {
+    alert("Departure and destination locations cannot be the same.");
+    return;
+  }
+
+  // Close Route Form Modal
+  closeRouteModal();
+
+  // A. Native Android Launch (passes route parameters to Java)
+  if (window.AndroidNative && window.AndroidNative.openMapsActivityWithRoute) {
+    window.AndroidNative.openMapsActivityWithRoute(from, to, time);
+  } 
+  // B. Web Desktop Fallback -> Opens Map Modal with Route Info Banner
+  else {
+    document.getElementById('routeText').textContent = `${from} → ${to}`;
+    document.getElementById('timeText').textContent = time;
+
+    const mapModal = document.getElementById('mapModal');
+    if (mapModal) {
+      mapModal.classList.add('active');
+    }
+  }
+}
+
+function closeMapModal() {
+  const mapModal = document.getElementById('mapModal');
+  if (mapModal) {
+    mapModal.classList.remove('active');
+  }
+}
+</script>
+<!-- Route & Departure Time Selection Modal -->
+<div class="route-modal" id="routeModal" onclick="if(event.target === this) closeRouteModal()">
+  <div class="route-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:20px;">🚌</span>
+        <h3 style="margin:0; color:var(--cream);" data-i18n="routeModalTitle">Select Bus Route & Time</h3>
+      </div>
+      <button onclick="closeRouteModal()" style="background:none; border:none; color:var(--cream); font-size:24px; cursor:pointer;">&times;</button>
+    </div>
+
+    <form onsubmit="handleRouteSearch(event)">
+      <!-- FROM LOCATION -->
+      <div class="form-group">
+        <label data-i18n="lblFrom">FROM (DEPARTURE STOP)</label>
+        <select id="fromLocation" required class="settings-select">
+          <option value="" disabled selected>Select starting location...</option>
+          <option value="Trivandrum Central">Trivandrum Central (TVM)</option>
+          <option value="Kollam Depot">Kollam Depot</option>
+          <option value="Kottayam">Kottayam</option>
+          <option value="Ernakulam / Vytilla Hub">Ernakulam / Vytilla Hub</option>
+          <option value="Thrissur Stand">Thrissur Stand</option>
+          <option value="Kozhikode Terminal">Kozhikode Terminal</option>
+          <option value="Kannur">Kannur</option>
+        </select>
+      </div>
+
+      <!-- TO LOCATION -->
+      <div class="form-group" style="margin-top:14px;">
+        <label data-i18n="lblTo">TO (DESTINATION STOP)</label>
+        <select id="toLocation" required class="settings-select">
+          <option value="" disabled selected>Select destination location...</option>
+          <option value="Ernakulam / Vytilla Hub">Ernakulam / Vytilla Hub</option>
+          <option value="Trivandrum Central">Trivandrum Central (TVM)</option>
+          <option value="Kottayam">Kottayam</option>
+          <option value="Thrissur Stand">Thrissur Stand</option>
+          <option value="Kozhikode Terminal">Kozhikode Terminal</option>
+          <option value="Kasaragod">Kasaragod</option>
+        </select>
+      </div>
+
+      <!-- TIME SELECTOR -->
+      <div class="form-group" style="margin-top:14px;">
+        <label data-i18n="lblTime">SCHEDULED BOARDING TIME</label>
+        <input type="time" id="travelTime" required class="settings-select" style="font-family: inherit;">
+      </div>
+
+      <!-- SUBMIT BUTTON -->
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top:22px; padding:12px; font-size:15px; border:none; cursor:pointer;">
+        🚀 Find & Track Bus
+      </button>
+    </form>
+  </div>
+</div>
 </body>
 </html>
