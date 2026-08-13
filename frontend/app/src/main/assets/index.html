@@ -522,6 +522,91 @@
   background: var(--ink-2, #12151a);
   color: var(--cream, #f4efe6);
 }
+
+/* =========================================================
+   QR Scanner & Ticket Result Modal
+   ========================================================= */
+.scanner-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.scanner-modal.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.scanner-card {
+  background: var(--ink-2, #12151a);
+  border: 1px solid var(--panel-border-hi, rgba(244, 239, 230, 0.22));
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+}
+
+/* Reader Video Box */
+#qr-reader {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border, rgba(244, 239, 230, 0.12));
+  background: var(--panel, rgba(244, 239, 230, 0.05));
+  margin-bottom: 16px;
+}
+
+#qr-reader video {
+  object-fit: cover !important;
+  border-radius: 12px;
+}
+
+/* Bus Details Card (Shown after scan) */
+.bus-details-card {
+  display: none;
+  background: var(--panel, rgba(244, 239, 230, 0.05));
+  border: 1px solid var(--gold, #f0b23e);
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 16px;
+}
+
+.bus-details-card.active {
+  display: block;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--panel-border, rgba(244, 239, 230, 0.08));
+  font-size: 14px;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: var(--slate, #98a2ad);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+
+.detail-val {
+  color: var(--cream, #f4efe6);
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -551,7 +636,7 @@
     </div>
   
     <button class="nav-cta" onclick="toggleSettings(true)" style="border:none; cursor:pointer;" data-i18n="navSettings">
-      ⚙️ Settings
+      ⚙️ Language
     </button>
   </nav>
 </div>
@@ -641,6 +726,13 @@
           <li data-i18n="f2Bullet1">Scan a ticket or stop code to open the live dashboard</li>
           <li data-i18n="f2Bullet2">One tap into trip details, route map, and support</li>
           <li data-i18n="f2Bullet3">Works as the front door to every other feature</li>
+          <!-- Example button trigger -->
+<div style="text-align: center; margin-top: 25px; width: 100%;">
+  <button class="btn btn-primary" onclick="openQRScanner()">
+  📷 Scan Ticket QR
+  </button>
+</div>
+</button>
         </ul>
       </div>
       <div class="feature-card reveal d2">
@@ -773,7 +865,7 @@ const translations = {
     navHome: "Home",
     navFeatures: "Features",
     navAbout: "About",
-    navSettings: "⚙️ Settings",
+    navSettings: "⚙️ Language",
     settingsTitle: "Settings",
     selectLanguage: "SELECT LANGUAGE",
     heroTitle: "SmartTransit",
@@ -819,7 +911,7 @@ const translations = {
     navHome: "ഹോം",
     navFeatures: "സവിശേഷതകൾ",
     navAbout: "കുറിച്ച്",
-    navSettings: "⚙️ ക്രമീകരണങ്ങൾ",
+    navSettings: "⚙️ ഭാഷ",
     settingsTitle: "ക്രമീകരണങ്ങൾ",
     selectLanguage: "ഭാഷ തിരഞ്ഞെടുക്കുക",
     heroTitle: "സ്മാർട്ട് ട്രാൻസിറ്റ്",
@@ -1199,5 +1291,135 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </div>
+
+<!-- QR Code Scanner Overlay Modal -->
+<div class="scanner-modal" id="scannerModal">
+  <div class="scanner-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="margin:0; color:var(--cream);" data-i18n="scannerTitle">Scan Bus Ticket QR</h3>
+      <button onclick="closeQRScanner()" style="background:none; border:none; color:var(--cream); font-size:24px; cursor:pointer;">&times;</button>
+    </div>
+
+    <!-- Video Stream Container -->
+    <div id="qr-reader"></div>
+
+    <!-- Scanned Bus Details Output Window -->
+    <div class="bus-details-card" id="busDetailsCard">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <span style="font-size:20px;">🚌</span>
+        <h4 style="margin:0; color:var(--gold);" id="busName">KSRTC Fast Passenger</h4>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">BUS NUMBER</span>
+        <span class="detail-val" id="busNum">KL-15-A-1234</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">ROUTE</span>
+        <span class="detail-val" id="busRoute">Trivandrum → Ernakulam</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">CONDUCTOR</span>
+        <span class="detail-val" id="conductorName">Rajesh Kumar</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">STATUS</span>
+        <span class="detail-val" style="color:var(--teal, #39b6a0);" id="busStatus">On Time (Live GPS)</span>
+      </div>
+
+      <button onclick="rescanQR()" style="width:100%; margin-top:16px; padding:10px; background:var(--panel-border-hi); border:none; color:var(--cream); border-radius:8px; cursor:pointer;">
+        Scan Another Ticket
+      </button>
+    </div>
+  </div>
+</div>
+<!-- 1. Include html5-qrcode library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<!-- 2. QR Scanner Engine Script -->
+<script>
+  let html5QrCode = null;
+
+  function openQRScanner() {
+    const modal = document.getElementById('scannerModal');
+    if (modal) modal.classList.add('active');
+
+    // Reset details view
+    document.getElementById('busDetailsCard').classList.remove('active');
+    document.getElementById('qr-reader').style.display = 'block';
+
+    // Initialize scanner
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("qr-reader");
+    }
+
+    const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+    html5QrCode.start(
+      { facingMode: "environment" }, // Rear camera
+      config,
+      onScanSuccess,
+      onScanFailure
+    ).catch(err => {
+      console.error("Camera access error: ", err);
+      alert("Unable to access camera. Please allow camera permissions.");
+    });
+  }
+
+  function onScanSuccess(decodedText, decodedResult) {
+    // Pause/Stop scanner upon successful scan
+    if (html5QrCode) {
+      html5QrCode.stop().then(() => {
+        document.getElementById('qr-reader').style.display = 'none';
+        parseAndDisplayBusData(decodedText);
+      }).catch(err => console.error(err));
+    }
+  }
+
+  function onScanFailure(error) {
+    // Continuous scan errors are ignored (normal while scanning)
+  }
+
+  function parseAndDisplayBusData(qrData) {
+    const detailsCard = document.getElementById('busDetailsCard');
+
+    try {
+      // Option A: If your ticket QR contains JSON formatted data
+      // e.g., {"busName":"KSRTC Swift","busNum":"KL-15-X-5678","route":"Kollam -> Alappuzha","conductor":"Suresh M","status":"On Time"}
+      const busInfo = JSON.parse(qrData);
+
+      document.getElementById('busName').textContent = busInfo.busName || "KSRTC Bus";
+      document.getElementById('busNum').textContent = busInfo.busNum || "KL-15-A-0000";
+      document.getElementById('busRoute').textContent = busInfo.route || "Kerala Route";
+      document.getElementById('conductorName').textContent = busInfo.conductor || "On Duty";
+      document.getElementById('busStatus').textContent = busInfo.status || "Active";
+    } catch (e) {
+      // Option B: Fallback if QR contains plain text/ID string (e.g., "BUS_102938")
+      document.getElementById('busName').textContent = "KSRTC Express";
+      document.getElementById('busNum').textContent = qrData;
+      document.getElementById('busRoute').textContent = "Trivandrum → Ernakulam";
+      document.getElementById('conductorName').textContent = "Assigned Conductor";
+      document.getElementById('busStatus').textContent = "Live Tracking Active";
+    }
+
+    detailsCard.classList.add('active');
+  }
+
+  function rescanQR() {
+    openQRScanner();
+  }
+
+  function closeQRScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => {
+        document.getElementById('scannerModal').classList.remove('active');
+      }).catch(() => {
+        document.getElementById('scannerModal').classList.remove('active');
+      });
+    } else {
+      document.getElementById('scannerModal').classList.remove('active');
+    }
+  }
+</script>
 </body>
 </html>
