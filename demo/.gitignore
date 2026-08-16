@@ -2,6 +2,7 @@
 # SECURE CONFIG — API Keys (NEVER commit these)
 # ============================================================
 frontend/app/src/main/assets/config/maps_api_config.js
+frontend/app/src/main/assets/config/app_config.js
 
 # Android build artifacts
 *.iml

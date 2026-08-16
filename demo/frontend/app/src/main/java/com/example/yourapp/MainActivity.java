@@ -16,6 +16,11 @@ public class MainActivity extends AppCompatActivity {
         webView = findViewById(R.id.webview);
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        // The app includes Malayalam, Hindi, Tamil, Kannada and Bengali text in
+        // local HTML assets.  Make the asset encoding explicit so WebView never
+        // falls back to a legacy single-byte encoding (which displays text as
+        // sequences such as "à´..." instead of the selected language).
+        webSettings.setDefaultTextEncodingName("UTF-8");
 
         // Bind Java interface to window.AndroidNative in JavaScript
         webView.addJavascriptInterface(new WebAppInterface(this), "AndroidNative");
