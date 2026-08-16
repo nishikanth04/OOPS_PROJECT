@@ -1,0 +1,100 @@
+[
+  {
+    "code": "TVM",
+    "name": "Thiruvananthapuram",
+    "headquarters": "Thiruvananthapuram",
+    "lat": 8.5241,
+    "lng": 76.9366
+  },
+  {
+    "code": "KLM",
+    "name": "Kollam",
+    "headquarters": "Kollam",
+    "lat": 8.8932,
+    "lng": 76.6141
+  },
+  {
+    "code": "PTA",
+    "name": "Pathanamthitta",
+    "headquarters": "Pathanamthitta",
+    "lat": 9.2648,
+    "lng": 76.7870
+  },
+  {
+    "code": "ALP",
+    "name": "Alappuzha",
+    "headquarters": "Alappuzha",
+    "lat": 9.4981,
+    "lng": 76.3388
+  },
+  {
+    "code": "KTM",
+    "name": "Kottayam",
+    "headquarters": "Kottayam",
+    "lat": 9.5916,
+    "lng": 76.5222
+  },
+  {
+    "code": "IDK",
+    "name": "Idukki",
+    "headquarters": "Painavu",
+    "lat": 9.8494,
+    "lng": 76.9710
+  },
+  {
+    "code": "EKM",
+    "name": "Ernakulam",
+    "headquarters": "Kochi",
+    "lat": 9.9312,
+    "lng": 76.2673
+  },
+  {
+    "code": "TSR",
+    "name": "Thrissur",
+    "headquarters": "Thrissur",
+    "lat": 10.5276,
+    "lng": 76.2144
+  },
+  {
+    "code": "PKD",
+    "name": "Palakkad",
+    "headquarters": "Palakkad",
+    "lat": 10.7867,
+    "lng": 76.6548
+  },
+  {
+    "code": "MLP",
+    "name": "Malappuram",
+    "headquarters": "Malappuram",
+    "lat": 11.0510,
+    "lng": 76.0711
+  },
+  {
+    "code": "KKD",
+    "name": "Kozhikode",
+    "headquarters": "Kozhikode",
+    "lat": 11.2588,
+    "lng": 75.7804
+  },
+  {
+    "code": "WYD",
+    "name": "Wayanad",
+    "headquarters": "Kalpetta",
+    "lat": 11.6854,
+    "lng": 76.0839
+  },
+  {
+    "code": "KNR",
+    "name": "Kannur",
+    "headquarters": "Kannur",
+    "lat": 11.8745,
+    "lng": 75.3704
+  },
+  {
+    "code": "KSD",
+    "name": "Kasaragod",
+    "headquarters": "Kasaragod",
+    "lat": 12.4996,
+    "lng": 74.9869
+  }
+]
