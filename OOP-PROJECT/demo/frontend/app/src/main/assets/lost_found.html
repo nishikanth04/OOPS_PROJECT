@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartTransit - Lost & Found Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --ink: #0c0e12;
+      --ink-2: #12151a;
+      --panel: rgba(244, 239, 230, 0.05);
+      --panel-border: rgba(244, 239, 230, 0.12);
+      --panel-border-hi: rgba(244, 239, 230, 0.22);
+      --cream: #f4efe6;
+      --slate: #98a2ad;
+      --gold: #f0b23e;
+      --teal: #39b6a0;
+      --red: #c3372c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--ink);
+      color: var(--cream);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Top Nav */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .back-btn {
+      color: var(--gold);
+      text-decoration: none;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Tab Layout */
+    .tab-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      color: var(--slate);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    /* Cards & Forms */
+    .card {
+      background: var(--ink-2);
+      border: 1px solid var(--panel-border-hi);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--gold);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--panel);
+      color: var(--cream);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gold);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* Status Tracking Box */
+    .status-box {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      display: none;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--panel-border);
+      font-size: 14px;
+    }
+
+    .status-row:last-child { border-bottom: none; }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .badge-pending { background: rgba(240, 178, 62, 0.2); color: var(--gold); }
+    .badge-success { background: rgba(57, 182, 160, 0.2); color: var(--teal); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="top-bar">
+      <a href="index.html" class="back-btn">← BACK TO HOME</a>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <a href="maps_navigation.html" class="back-btn" style="color:var(--teal);">🗺️ MAPS &amp; NAVIGATION</a>
+        <div style="font-weight:700; font-size:18px;">SmartTransit Support</div>
+      </div>
+    </div>
+
+    <!-- Switch Between Reporting and Tracking -->
+    <div class="tab-row">
+      <button class="tab-btn active" id="btnTabReport" onclick="switchTab('report')">📝 Register Complaint</button>
+      <button class="tab-btn" id="btnTabTrack" onclick="switchTab('track')">🔍 Check Status</button>
+    </div>
+
+    <!-- SECTION 1: REGISTER COMPLAINT -->
+    <div class="card" id="sectionReport">
+      <h2 style="margin-bottom: 6px; font-size: 20px;">Report Lost Property / Complaint</h2>
+      <p style="color: var(--slate); font-size: 13px; margin-bottom: 22px;">
+        Details are forwarded immediately to the bus depot controller and on-duty conductor.
+      </p>
+
+      <form id="lostForm" onsubmit="submitLostComplaint(event)">
+        <div class="form-group">
+          <label>KSRTC Bus Number / Vehicle Reg</label>
+          <input type="text" id="busNumber" placeholder="e.g. KL-15-A-1234 or Bus 204" required>
+        </div>
+
+       <div class="form-group">
+      <label>Lost Item Name / Type</label>
+      <input type="text" id="itemCategory" placeholder="e.g. Black Leather Wallet, HP Laptop Bag, Blue Umbrella" required>
+    </div>
+
+        <div class="form-group">
+          <label>Detailed Description & Seat/Location</label>
+          <textarea id="itemDesc" rows="3" placeholder="Describe color, brand, or approx seat location (e.g. Blue Puma bag left on row 4 right side)..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Passenger Contact Phone Number</label>
+          <input type="tel" id="contactPhone" placeholder="Enter your 10-digit mobile number" required>
+        </div>
+
+        <button type="submit" class="btn-submit">🚀 Dispatch Alert to Bus Conductor</button>
+      </form>
+    </div>
+
+    <!-- SECTION 2: TRACK STATUS -->
+    <div class="card" id="sectionTrack" style="display: none;">
+      <h2 style="margin-bottom: 6px; font-size: 20px;">Track Investigation Status</h2>
+      <p style="color: var(--slate); font-size: 13px; margin-bottom: 22px;">
+        Enter your Complaint ID or Phone Number to check recovery progress.
+      </p>
+
+      <form onsubmit="trackComplaintStatus(event)">
+        <div class="form-group">
+          <label>Complaint Reference ID</label>
+          <input type="text" id="trackIdInput" placeholder="e.g. KSRTC-LF-8492" required>
+        </div>
+        <button type="submit" class="btn-submit" style="background: var(--gold); color: #000;">Search Status</button>
+      </form>
+
+      <!-- Dynamic Status Results Window -->
+      <div class="status-box" id="statusResultBox">
+        <div class="status-row">
+          <span style="color: var(--slate);">REFERENCE ID</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700;" id="resId">---</span>
+        </div>
+        <div class="status-row">
+          <span style="color: var(--slate);">BUS NUMBER</span>
+          <span id="resBus">---</span>
+        </div>
+        <div class="status-row">
+          <span style="color: var(--slate);">ITEM DETAILS</span>
+          <span id="resItem">---</span>
+        </div>
+        <div class="status-row">
+          <span style="color: var(--slate);">CURRENT STATUS</span>
+          <span id="resStatusBadge" class="badge badge-pending">PENDING</span>
+        </div>
+        <div class="status-row">
+          <span style="color: var(--slate);">ACTION NOTE</span>
+          <span style="color: var(--teal); text-align: right;" id="resActionNote">---</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching logic
+    function switchTab(tab) {
+      document.getElementById('sectionReport').style.display = tab === 'report' ? 'block' : 'none';
+      document.getElementById('sectionTrack').style.display = tab === 'track' ? 'block' : 'none';
+      document.getElementById('btnTabReport').classList.toggle('active', tab === 'report');
+      document.getElementById('btnTabTrack').classList.toggle('active', tab === 'track');
+    }
+
+    // Handle complaint submission
+    function submitLostComplaint(event) {
+      event.preventDefault();
+
+      const bus = document.getElementById('busNumber').value;
+      const category = document.getElementById('itemCategory').value;
+      const desc = document.getElementById('itemDesc').value;
+      const phone = document.getElementById('contactPhone').value;
+
+      // Generate a unique tracking reference ID
+      const complaintId = 'KSRTC-LF-' + Math.floor(1000 + Math.random() * 9000);
+
+      const complaintData = {
+        id: complaintId,
+        bus: bus,
+        category: category,
+        desc: desc,
+        phone: phone,
+        status: 'Conductor Notified',
+        actionNote: 'Alert broadcasted to bus crew. Searching under seats.'
+      };
+
+      // Persist complaint locally
+      localStorage.setItem(complaintId, JSON.stringify(complaintData));
+
+      alert(`✅ Alert Sent to Bus Conductor!\n\nYour Tracking Reference ID: ${complaintId}\n\nKeep this ID to monitor real-time recovery status.`);
+
+      // Switch to tracking tab automatically
+      document.getElementById('lostForm').reset();
+      switchTab('track');
+      document.getElementById('trackIdInput').value = complaintId;
+      trackComplaintStatus(null, complaintId);
+    }
+
+    // Search and display recovery status
+    function trackComplaintStatus(event, overrideId) {
+      if (event) event.preventDefault();
+
+      const searchId = overrideId || document.getElementById('trackIdInput').value.trim();
+      const savedData = localStorage.getItem(searchId);
+
+      const resultBox = document.getElementById('statusResultBox');
+
+      if (savedData) {
+        const item = JSON.parse(savedData);
+        document.getElementById('resId').textContent = item.id;
+        document.getElementById('resBus').textContent = item.bus;
+        document.getElementById('resItem').textContent = `${item.category} (${item.desc})`;
+        
+        const badge = document.getElementById('resStatusBadge');
+        badge.textContent = item.status.toUpperCase();
+        badge.className = item.status === 'Item Found' ? 'badge badge-success' : 'badge badge-pending';
+
+        document.getElementById('resActionNote').textContent = item.actionNote;
+        resultBox.style.display = 'block';
+      } else {
+        alert('Reference ID not found. Please verify the ID and try again.');
+        resultBox.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

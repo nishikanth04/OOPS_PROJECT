@@ -1,0 +1,192 @@
+[
+  {
+    "code": "TVM-C",
+    "name": "Thiruvananthapuram Central",
+    "district": "Thiruvananthapuram",
+    "lat": 8.4875,
+    "lng": 76.9525,
+    "bus_count": 180,
+    "routes_operated": 85,
+    "types": ["ordinary", "fast", "superfast", "superdeluxe", "ac", "volvo"]
+  },
+  {
+    "code": "EKM",
+    "name": "Ernakulam",
+    "district": "Ernakulam",
+    "lat": 9.9816,
+    "lng": 76.2999,
+    "bus_count": 160,
+    "routes_operated": 75,
+    "types": ["ordinary", "fast", "superfast", "superdeluxe", "ac", "volvo"]
+  },
+  {
+    "code": "KKD",
+    "name": "Kozhikode",
+    "district": "Kozhikode",
+    "lat": 11.2588,
+    "lng": 75.7804,
+    "bus_count": 140,
+    "routes_operated": 65,
+    "types": ["ordinary", "fast", "superfast", "superdeluxe", "ac"]
+  },
+  {
+    "code": "TSR",
+    "name": "Thrissur",
+    "district": "Thrissur",
+    "lat": 10.5210,
+    "lng": 76.2108,
+    "bus_count": 120,
+    "routes_operated": 55,
+    "types": ["ordinary", "fast", "superfast", "superdeluxe"]
+  },
+  {
+    "code": "PKD",
+    "name": "Palakkad",
+    "district": "Palakkad",
+    "lat": 10.7750,
+    "lng": 76.6515,
+    "bus_count": 90,
+    "routes_operated": 40,
+    "types": ["ordinary", "fast", "superfast"]
+  },
+  {
+    "code": "KNR",
+    "name": "Kannur",
+    "district": "Kannur",
+    "lat": 11.8650,
+    "lng": 75.3700,
+    "bus_count": 100,
+    "routes_operated": 48,
+    "types": ["ordinary", "fast", "superfast", "superdeluxe"]
+  },
+  {
+    "code": "KTM",
+    "name": "Kottayam",
+    "district": "Kottayam",
+    "lat": 9.5930,
+    "lng": 76.5210,
+    "bus_count": 85,
+    "routes_operated": 38,
+    "types": ["ordinary", "fast", "superfast"]
+  },
+  {
+    "code": "KLM",
+    "name": "Kollam",
+    "district": "Kollam",
+    "lat": 8.8878,
+    "lng": 76.5985,
+    "bus_count": 80,
+    "routes_operated": 35,
+    "types": ["ordinary", "fast", "superfast"]
+  },
+  {
+    "code": "ALP",
+    "name": "Alappuzha",
+    "district": "Alappuzha",
+    "lat": 9.4981,
+    "lng": 76.3388,
+    "bus_count": 65,
+    "routes_operated": 30,
+    "types": ["ordinary", "fast", "superfast"]
+  },
+  {
+    "code": "KSD",
+    "name": "Kasaragod",
+    "district": "Kasaragod",
+    "lat": 12.5000,
+    "lng": 74.9900,
+    "bus_count": 55,
+    "routes_operated": 25,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "MLP",
+    "name": "Malappuram",
+    "district": "Malappuram",
+    "lat": 11.0510,
+    "lng": 76.0711,
+    "bus_count": 75,
+    "routes_operated": 33,
+    "types": ["ordinary", "fast", "superfast"]
+  },
+  {
+    "code": "IDK",
+    "name": "Idukki",
+    "district": "Idukki",
+    "lat": 9.8494,
+    "lng": 76.9710,
+    "bus_count": 40,
+    "routes_operated": 18,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "WYD",
+    "name": "Wayanad",
+    "district": "Wayanad",
+    "lat": 11.6854,
+    "lng": 76.0839,
+    "bus_count": 35,
+    "routes_operated": 15,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "PTA",
+    "name": "Pathanamthitta",
+    "district": "Pathanamthitta",
+    "lat": 9.2648,
+    "lng": 76.7870,
+    "bus_count": 50,
+    "routes_operated": 22,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "GVR",
+    "name": "Guruvayoor",
+    "district": "Thrissur",
+    "lat": 10.5935,
+    "lng": 76.0417,
+    "bus_count": 45,
+    "routes_operated": 20,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "VDK",
+    "name": "Vadakara",
+    "district": "Kozhikode",
+    "lat": 11.5950,
+    "lng": 75.4917,
+    "bus_count": 40,
+    "routes_operated": 18,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "MNK",
+    "name": "Mannarkkad",
+    "district": "Palakkad",
+    "lat": 11.0020,
+    "lng": 76.4530,
+    "bus_count": 30,
+    "routes_operated": 14,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "ADR",
+    "name": "Adoor",
+    "district": "Pathanamthitta",
+    "lat": 9.1553,
+    "lng": 76.7325,
+    "bus_count": 35,
+    "routes_operated": 16,
+    "types": ["ordinary", "fast"]
+  },
+  {
+    "code": "MVK",
+    "name": "Mavelikara",
+    "district": "Alappuzha",
+    "lat": 9.2578,
+    "lng": 76.5506,
+    "bus_count": 30,
+    "routes_operated": 14,
+    "types": ["ordinary", "fast"]
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "fare_rates": {
+    "ordinary": {
+      "base": 10.0,
+      "per_km": 0.90,
+      "minimum": 10.0,
+      "label": "Ordinary / City Bus"
+    },
+    "fast": {
+      "base": 15.0,
+      "per_km": 1.05,
+      "minimum": 15.0,
+      "label": "Fast Passenger (FP)"
+    },
+    "superfast": {
+      "base": 22.0,
+      "per_km": 1.15,
+      "minimum": 22.0,
+      "label": "SuperFast (SF)"
+    },
+    "superdeluxe": {
+      "base": 30.0,
+      "per_km": 1.30,
+      "minimum": 30.0,
+      "label": "Super Deluxe Air Express"
+    },
+    "ac": {
+      "base": 40.0,
+      "per_km": 1.50,
+      "minimum": 40.0,
+      "label": "AC Low Floor / Minnal"
+    },
+    "volvo": {
+      "base": 50.0,
+      "per_km": 1.80,
+      "minimum": 50.0,
+      "label": "KSRTC SWIFT / Scania / Volvo"
+    }
+  },
+  "concession_rates": {
+    "none": {
+      "discount": 0.0,
+      "label": "General Passenger (No Concession)"
+    },
+    "student": {
+      "discount": 0.50,
+      "label": "Student Concession (50% Off)"
+    },
+    "senior": {
+      "discount": 0.30,
+      "label": "Senior Citizen (30% Off)"
+    },
+    "disabled": {
+      "discount": 0.50,
+      "label": "Differently Abled (50% Off)"
+    },
+    "freedom_fighter": {
+      "discount": 1.00,
+      "label": "Freedom Fighter / Honoree (100% Free)"
+    }
+  },
+  "metro_fare": {
+    "base_fare": 10,
+    "per_zone": 10,
+    "max_fare": 60
+  }
+}

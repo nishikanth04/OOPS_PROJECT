@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartTransit — Kerala Live Maps &amp; Navigation Network</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,450;0,9..144,650;1,9..144,450&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <style>
+    :root {
+      --ink: #0b0d10;
+      --ink-2: #12151a;
+      --ink-3: #181c22;
+      --panel: rgba(244, 239, 230, 0.055);
+      --panel-border: rgba(244, 239, 230, 0.12);
+      --panel-border-hi: rgba(240, 178, 62, 0.35);
+      --cream: #f4efe6;
+      --slate: #98a2ad;
+      --slate-dim: #69727c;
+      --red: #c3372c;
+      --red-2: #8f2620;
+      --gold: #f0b23e;
+      --gold-dim: #caa25a;
+      --teal: #39b6a0;
+      --blue: #2f80ed;
+      --nav-blue: #3861fb;
+      --nav-blue-casing: #153bb5;
+      --shadow: 0 24px 48px -18px rgba(0,0,0,0.75);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body {
+      height: 100%;
+      width: 100%;
+      background-color: var(--ink);
+      color: var(--cream);
+      font-family: 'Manrope', sans-serif;
+      overflow: hidden;
+    }
+
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.22;
+    }
+    .blob.b1 { width: 480px; height: 480px; background: var(--red); top: -100px; left: -100px; }
+    .blob.b2 { width: 440px; height: 440px; background: var(--gold); bottom: 10%; right: -80px; }
+    .blob.b3 { width: 380px; height: 380px; background: var(--teal); top: 40%; left: 30%; }
+
+    header {
+      position: relative;
+      z-index: 1000;
+      background: rgba(11, 13, 16, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 10px 24px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .nav-inner {
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--cream);
+    }
+    
+    .brand-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(145deg, var(--red), var(--red-2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 13px; color: var(--gold);
+      box-shadow: inset 0 0 0 1px rgba(240,178,62,0.4);
+    }
+    
+    .brand-text h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    
+    .brand-text span {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11.5px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 7px 14px;
+      border-radius: 100px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid var(--panel-border);
+    }
+    
+    .nav-btn-ghost {
+      background: var(--panel);
+      color: var(--cream);
+    }
+    .nav-btn-ghost:hover {
+      background: rgba(244,239,230,0.12);
+      border-color: var(--panel-border-hi);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn-primary {
+      background: linear-gradient(145deg, var(--red), var(--red-2));
+      color: var(--cream);
+      border: 1px solid rgba(240,178,62,0.3);
+      box-shadow: 0 8px 20px -6px rgba(195,55,44,0.6);
+    }
+    .nav-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -6px rgba(195,55,44,0.8);
+    }
+
+    .live-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(57, 182, 160, 0.12);
+      border: 1px solid rgba(57, 182, 160, 0.3);
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--teal);
+    }
+    
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 10px var(--teal);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .app-main {
+      display: flex;
+      position: relative;
+      z-index: 1;
+      height: calc(100vh - 62px);
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 420px;
+      background: rgba(18, 21, 26, 0.95);
+      border-right: 1px solid var(--panel-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      background: var(--ink);
+      border-bottom: 1px solid var(--panel-border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-shrink: 0;
+    }
+    .sidebar-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-item {
+      padding: 12px 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--slate);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .tab-item:hover { color: var(--cream); background: var(--panel); }
+    .tab-item.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+      background: rgba(240, 178, 62, 0.08);
+    }
+
+    .tab-content-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .tab-pane.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-row { margin-bottom: 14px; }
+    .form-row:last-child { margin-bottom: 0; }
+
+    .form-label {
+      display: block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .input-field, .select-field {
+      width: 100%;
+      padding: 11px 13px;
+      background: var(--ink-2);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      color: var(--cream);
+      font-family: 'Manrope', sans-serif;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field:focus, .select-field:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(240, 178, 62, 0.2);
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(145deg, var(--red), var(--red-2));
+      color: var(--cream);
+      border: 1px solid rgba(240, 178, 62, 0.3);
+      border-radius: 12px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 10px 24px -8px rgba(195, 55, 44, 0.6);
+    }
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -6px rgba(195, 55, 44, 0.8);
+    }
+
+    .route-result-card {
+      background: var(--ink-3);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+      position: relative;
+    }
+    .route-result-card.highlight {
+      border-color: var(--gold);
+      box-shadow: 0 12px 30px -10px rgba(240, 178, 62, 0.25);
+    }
+
+    .result-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .tag-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .tag-bus { background: rgba(195, 55, 44, 0.25); color: #ff7675; border: 1px solid rgba(195, 55, 44, 0.4); }
+    .tag-volvo { background: rgba(240, 178, 62, 0.25); color: var(--gold); border: 1px solid rgba(240, 178, 62, 0.4); }
+
+    .route-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+      padding: 10px;
+      background: var(--ink);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .metric-val {
+      font-family: 'Fraunces', serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--cream);
+    }
+    .metric-lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9.5px;
+      color: var(--slate-dim);
+      text-transform: uppercase;
+    }
+
+    .stop-timeline {
+      margin: 12px 0;
+      position: relative;
+      padding-left: 18px;
+    }
+    .stop-timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--panel-border-hi);
+    }
+    .timeline-node {
+      position: relative;
+      font-size: 12px;
+      color: var(--slate);
+      margin-bottom: 6px;
+    }
+    .timeline-node:last-child { margin-bottom: 0; color: var(--cream); font-weight: 600; }
+    .timeline-node::before {
+      content: '';
+      position: absolute;
+      left: -16px;
+      top: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+    }
+
+    /* FULL FLUID MAP STYLING */
+    .map-container {
+      flex: 1 1 0%;
+      height: 100%;
+      width: 100%;
+      position: relative;
+      background: #e5e3df;
+      overflow: hidden;
+    }
+    #map {
+      height: 100% !important;
+      width: 100% !important;
+      position: absolute !important;
+      inset: 0 !important;
+    }
+
+    /* SINGLE ROUTE CALLOUT BUBBLE */
+    .gmap-route-bubble {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      padding: 6px 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      font-family: 'Manrope', sans-serif;
+      pointer-events: auto;
+      cursor: pointer;
+      white-space: nowrap;
+      transform: translate(-50%, -50%);
+    }
+    .gmap-bubble-time {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #d97706;
+    }
+    .gmap-bubble-dist {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4b5563;
+      padding-left: 20px;
+    }
+
+    .gmap-origin-pin {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 4px solid #1f2937;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    
+    .gmap-origin-label, .gmap-dest-label {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      color: #1f2937;
+      text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+      white-space: nowrap;
+    }
+    .gmap-origin-label { top: -24px; }
+    .gmap-dest-label { bottom: -22px; }
+
+    .map-floating-panel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 800;
+      background: rgba(18, 21, 26, 0.90);
+      border: 1px solid var(--panel-border-hi);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      width: 200px;
+    }
+
+    .map-floating-panel h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .layer-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--cream);
+      margin-bottom: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .layer-toggle:last-child { margin-bottom: 0; }
+
+    .layer-checkbox {
+      accent-color: var(--gold);
+      cursor: pointer;
+      width: 15px;
+      height: 15px;
+    }
+
+    .vehicle-status-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 800;
+      background: rgba(18, 21, 26, 0.92);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 440px;
+    }
+
+    .live-route-bus {
+      width: 28px;
+      height: 28px;
+      background: #f0b23e;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 0 16px rgba(240, 178, 62, 0.9);
+      animation: pulseBus 1.5s infinite alternate;
+    }
+    @keyframes pulseBus {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.15); }
+    }
+
+    .tile-switcher {
+      display: flex;
+      gap: 4px;
+      background: rgba(12,14,18,0.7);
+      border: 1px solid rgba(244,239,230,0.12);
+      border-radius: 10px;
+      padding: 3px;
+      backdrop-filter: blur(8px);
+    }
+    .tile-btn {
+      background: transparent;
+      border: none;
+      color: var(--slate);
+      font-family: 'Manrope', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      white-space: nowrap;
+    }
+    .tile-btn:hover { background: rgba(244,239,230,0.08); color: var(--cream); }
+    .tile-btn.active-tile { background: var(--gold); color: #0b0d10; }
+  </style>
+</head>
+<body>
+
+  <div class="ambient">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+
+  <header>
+    <div class="nav-inner">
+      <!-- Top-Left Branding & Back To Home Button -->
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <a href="index.html" class="nav-btn nav-btn-ghost" style="padding: 6px 14px; color: var(--gold); font-size: 11.5px;">
+          ← Back to Home
+        </a>
+        <a href="index.html" class="brand-wrap">
+          <div class="brand-mark">ST</div>
+          <div class="brand-text">
+            <h1>SmartTransit</h1>
+            <span>Kerala Public Transport Live Maps</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="live-status-pill">
+        <span class="live-dot"></span>
+        <span>Kerala Highway Corridor Live Road Tracking</span>
+      </div>
+
+      <div class="header-actions">
+        <div class="tile-switcher" title="Switch Map Style">
+          <button id="tile-osm" class="tile-btn active-tile" onclick="switchMapLayer('osm')">🗺️ Street</button>
+          <button id="tile-dark" class="tile-btn" onclick="switchMapLayer('dark')">🌙 Dark</button>
+          <button id="tile-satellite" class="tile-btn" onclick="switchMapLayer('satellite')">🛰️ Satellite</button>
+          <button id="tile-terrain" class="tile-btn" onclick="switchMapLayer('terrain')">⛰️ Terrain</button>
+        </div>
+        <button class="nav-btn nav-btn-primary" onclick="locateUserPosition()">📍 Locate Me</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    
+    <aside class="sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab-item active" onclick="switchSidebarTab('routePlanner')">🗺️ Route Planner</button>
+      </div>
+
+      <div class="tab-content-wrapper">
+        <div class="tab-pane active" id="tab-routePlanner">
+          <div class="form-card">
+            <h3 style="font-family:'Fraunces',serif; font-size:18px; margin-bottom:12px; color:var(--cream);">Find Kerala Transit Route</h3>
+            
+            <form onsubmit="handleRoutePlannerSubmit(event)">
+              <div class="form-row">
+                <label class="form-label">Origin (Departure Station)</label>
+                <select id="planOrigin" class="select-field" required></select>
+              </div>
+
+              <div class="form-row">
+                <label class="form-label">Destination (Arrival Station)</label>
+                <select id="planDestination" class="select-field" required></select>
+              </div>
+
+              <button type="submit" class="btn-action">
+                🚀 Search Transit Routes
+              </button>
+            </form>
+          </div>
+
+          <div id="routeResultsContainer"></div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="map-container">
+      <div id="map"></div>
+
+      <div class="map-floating-panel">
+        <h4>
+          <span>Layers</span>
+          <span style="font-size:10px; color:var(--slate);">LIVE</span>
+        </h4>
+        
+        <label class="layer-toggle">
+          <span><span style="color:#c3372c;">●</span> KSRTC Bus Stops</span>
+          <input type="checkbox" id="layerToggleStops" class="layer-checkbox" checked onchange="toggleMapLayer('stops')">
+        </label>
+
+        <label class="layer-toggle">
+          <span><span style="color:#ff7675;">●</span> Live Fleet Sim</span>
+          <input type="checkbox" id="layerToggleSimulation" class="layer-checkbox" checked onchange="toggleMapLayer('simulation')">
+        </label>
+      </div>
+
+      <div class="vehicle-status-overlay">
+        <div class="live-dot" style="background:#f0b23e; box-shadow:0 0 10px #f0b23e;"></div>
+        <div>
+          <div style="font-size:12px; font-weight:700; color:var(--cream);" id="simStatusTitle">KSRTC Live Navigation</div>
+          <div style="font-size:10.5px; font-family:'IBM Plex Mono',monospace; color:var(--slate);" id="simStatusSub">Tracking road network geometry &amp; travel times in real time.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Leaflet Core Engine -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- KERALA TRANSIT ENGINE -->
+  <script>
+    function formatDuration(minutes) {
+      if (!minutes || isNaN(minutes)) return "0 min";
+      const h = Math.floor(minutes / 60);
+      const m = Math.round(minutes % 60);
+      if (h > 0 && m > 0) return `${h} hr ${m} min`;
+      if (h > 0 && m === 0) return `${h} hr`;
+      return `${m} min`;
+    }
+
+    const keralaStops = [
+      { name: "Alappuzha KSRTC", lat: 9.4981, lng: 76.3388, district: "Alappuzha" },
+      { name: "Kottayam KSRTC", lat: 9.5930, lng: 76.5210, district: "Kottayam" },
+      { name: "Thrissur", lat: 10.5276, lng: 76.2144, district: "Thrissur" },
+      { name: "Cherthala", lat: 9.6838, lng: 76.3358, district: "Alappuzha" },
+      { name: "Thampanoor Bus Station", lat: 8.4875, lng: 76.9525, district: "Thiruvananthapuram" },
+      { name: "Attingal", lat: 8.6967, lng: 76.8156, district: "Thiruvananthapuram" },
+      { name: "Kollam KSRTC", lat: 8.8878, lng: 76.5985, district: "Kollam" },
+      { name: "Kottarakkara", lat: 8.9989, lng: 76.7699, district: "Kollam" },
+      { name: "Adoor", lat: 9.1553, lng: 76.7325, district: "Pathanamthitta" },
+      { name: "Pathanamthitta KSRTC", lat: 9.2648, lng: 76.7870, district: "Pathanamthitta" },
+      { name: "Kayamkulam", lat: 9.1724, lng: 76.5002, district: "Alappuzha" },
+      { name: "Changanassery", lat: 9.4439, lng: 76.5393, district: "Kottayam" },
+      { name: "Ernakulam KSRTC Bus Stand", lat: 9.9816, lng: 76.2999, district: "Ernakulam" },
+      { name: "Vyttila Mobility Hub", lat: 9.9674, lng: 76.3204, district: "Ernakulam" },
+      { name: "Aluva", lat: 10.1099, lng: 76.3495, district: "Ernakulam" },
+      { name: "Angamaly", lat: 10.1960, lng: 76.3860, district: "Ernakulam" },
+      { name: "Chalakudy", lat: 10.3070, lng: 76.3310, district: "Thrissur" },
+      { name: "Muvattupuzha", lat: 9.9875, lng: 76.5757, district: "Ernakulam" },
+      { name: "Munnar", lat: 10.0889, lng: 77.0595, district: "Idukki" },
+      { name: "Palakkad KSRTC", lat: 10.7750, lng: 76.6515, district: "Palakkad" },
+      { name: "Malappuram KSRTC", lat: 11.0510, lng: 76.0711, district: "Malappuram" },
+      { name: "Kozhikode KSRTC", lat: 11.2588, lng: 75.7804, district: "Kozhikode" },
+      { name: "Wayanad Kalpetta", lat: 11.6854, lng: 76.0839, district: "Wayanad" },
+      { name: "Sulthan Bathery", lat: 11.6647, lng: 76.2530, district: "Wayanad" },
+      { name: "Kannur KSRTC", lat: 11.8650, lng: 75.3700, district: "Kannur" },
+      { name: "Thalassery", lat: 11.7490, lng: 75.4904, district: "Kannur" },
+      { name: "Payyanur", lat: 12.0939, lng: 75.2060, district: "Kannur" },
+      { name: "Kasaragod KSRTC", lat: 12.5000, lng: 74.9900, district: "Kasaragod" },
+      { name: "Kanhangad", lat: 12.3066, lng: 75.0898, district: "Kasaragod" }
+    ];
+
+    const sampleRoutes = [
+      {
+        route_id: "ALP-KTM-SF01",
+        name: "Alappuzha KSRTC ⇄ Kottayam KSRTC Express",
+        origin: "Alappuzha KSRTC",
+        destination: "Kottayam KSRTC",
+        via: ["Changanassery"],
+        distance_km: 29,
+        duration_minutes: 51,
+        fare_inr: 55,
+        type: "superfast",
+        departure_times: ["06:30", "08:15", "10:45", "13:30", "15:45", "18:00"]
+      },
+      {
+        route_id: "TVM-VYT-SF01",
+        name: "Thampanoor Bus Station ⇄ Vyttila Mobility Hub Express",
+        origin: "Thampanoor Bus Station",
+        destination: "Vyttila Mobility Hub",
+        via: ["Attingal", "Kollam KSRTC", "Kayamkulam", "Alappuzha KSRTC", "Cherthala"],
+        distance_km: 228,
+        duration_minutes: 370, // 6 hr 10 min
+        fare_inr: 284,
+        type: "superfast",
+        departure_times: ["05:00", "06:30", "08:00", "10:00", "12:00", "14:00"]
+      },
+      {
+        route_id: "TSR-CTL-SF01",
+        name: "Thrissur — Cherthala SuperFast",
+        origin: "Thrissur",
+        destination: "Cherthala",
+        via: ["Chalakudy", "Angamaly", "Aluva", "Ernakulam KSRTC Bus Stand"],
+        distance_km: 110,
+        duration_minutes: 165,
+        fare_inr: 125,
+        type: "superfast",
+        departure_times: ["06:00", "07:30", "09:00", "11:30", "14:00", "16:30"]
+      }
+    ];
+
+    let map = null;
+    let activeBaseLayer = null;
+    const mapLayerGroups = {
+      stops: null,
+      simulation: null,
+      activeRoute: null
+    };
+
+    let activeBusMarker = null;
+    let activeBusInterval = null;
+
+    const tileLayers = {
+      osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+      }),
+      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO', maxZoom: 19
+      }),
+      satellite: L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps', maxZoom: 19
+      }),
+      terrain: L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps Terrain', maxZoom: 19
+      })
+    };
+
+    function findStop(name) {
+      if (!name) return null;
+      const clean = name.trim().toLowerCase();
+      return keralaStops.find(s => s.name.toLowerCase() === clean || s.name.toLowerCase().includes(clean) || clean.includes(s.name.toLowerCase())) || null;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      populateDropdowns();
+      handleRoutePlannerSubmit(null);
+
+      window.addEventListener('resize', () => {
+        if (map) map.invalidateSize();
+      });
+    });
+
+    function initMap() {
+      map = L.map('map', {
+        center: [9.55, 76.45],
+        zoom: 10,
+        minZoom: 7,
+        maxZoom: 19,
+        zoomControl: true
+      });
+
+      activeBaseLayer = tileLayers.osm;
+      activeBaseLayer.addTo(map);
+
+      for (const key in mapLayerGroups) {
+        mapLayerGroups[key] = L.layerGroup().addTo(map);
+      }
+
+      renderMapStops();
+
+      setTimeout(() => {
+        if (map) map.invalidateSize();
+      }, 150);
+    }
+
+    function switchMapLayer(key) {
+      if (!map || !tileLayers[key]) return;
+      if (activeBaseLayer) map.removeLayer(activeBaseLayer);
+      activeBaseLayer = tileLayers[key];
+      activeBaseLayer.addTo(map);
+
+      document.querySelectorAll('.tile-btn').forEach(b => b.classList.remove('active-tile'));
+      const btn = document.getElementById('tile-' + key);
+      if (btn) btn.classList.add('active-tile');
+      map.invalidateSize();
+    }
+
+    function renderMapStops() {
+      mapLayerGroups.stops.clearLayers();
+      keralaStops.forEach(s => {
+        const icon = L.divIcon({
+          className: 'stop-pin',
+          html: `<div style="width:9px; height:9px; border-radius:50%; background:#2563eb; border:2px solid #ffffff; box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
+          iconSize: [9, 9],
+          iconAnchor: [4.5, 4.5]
+        });
+        L.marker([s.lat, s.lng], { icon })
+          .bindPopup(`<b>${s.name}</b><br><span style="font-size:11px; color:#555;">${s.district} District</span>`)
+          .addTo(mapLayerGroups.stops);
+      });
+    }
+
+    function populateDropdowns() {
+      const fromSel = document.getElementById('planOrigin');
+      const toSel = document.getElementById('planDestination');
+
+      keralaStops.forEach(s => {
+        fromSel.add(new Option(s.name, s.name));
+        toSel.add(new Option(s.name, s.name));
+      });
+
+      fromSel.value = "Thampanoor Bus Station";
+      toSel.value = "Vyttila Mobility Hub";
+    }
+
+    function switchSidebarTab(tabId) {
+      document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+      if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+      }
+      const targetPane = document.getElementById('tab-' + tabId);
+      if (targetPane) targetPane.classList.add('active');
+      setTimeout(() => { if (map) map.invalidateSize(); }, 100);
+    }
+
+    function toggleMapLayer(layerName) {
+      const checkbox = document.getElementById('layerToggle' + layerName.charAt(0).toUpperCase() + layerName.slice(1));
+      if (!mapLayerGroups[layerName]) return;
+
+      if (checkbox && checkbox.checked) {
+        map.addLayer(mapLayerGroups[layerName]);
+      } else {
+        map.removeLayer(mapLayerGroups[layerName]);
+      }
+    }
+
+    function handleRoutePlannerSubmit(e) {
+      if (e) e.preventDefault();
+
+      const origin = document.getElementById('planOrigin').value;
+      const dest = document.getElementById('planDestination').value;
+
+      let matchedRoutes = sampleRoutes.filter(r => r.origin === origin && r.destination === dest);
+
+      if (matchedRoutes.length === 0) {
+        const s1 = findStop(origin);
+        const s2 = findStop(dest);
+        let approxDist = 45;
+        let estMinutes = 75;
+        if (s1 && s2) {
+          const dLat = (s2.lat - s1.lat) * 111;
+          const dLng = (s2.lng - s1.lng) * 111 * Math.cos(s1.lat * Math.PI / 180);
+          approxDist = Math.max(10, Math.round(Math.sqrt(dLat * dLat + dLng * dLng) * 1.28));
+          estMinutes = Math.round((approxDist / 38) * 60) + 10;
+        }
+
+        matchedRoutes = [
+          {
+            route_id: `KSRTC-${Math.floor(100 + Math.random()*900)}`,
+            name: `${origin} ⇄ ${dest} Express`,
+            origin: origin,
+            destination: dest,
+            via: [],
+            distance_km: approxDist,
+            duration_minutes: estMinutes,
+            fare_inr: Math.round(22 + approxDist * 1.15),
+            type: "superfast",
+            departure_times: ["06:00", "08:30", "11:00", "14:00", "17:30"]
+          }
+        ];
+      }
+
+      window.currentPlannedRoutes = matchedRoutes;
+
+      let html = '';
+      matchedRoutes.forEach((r, idx) => {
+        const fullStops = [r.origin, ...(r.via || []), r.destination];
+        html += `
+          <div class="route-result-card highlight">
+            <div class="result-badge-row">
+              <span class="tag-badge tag-bus">BUS</span>
+              <span class="tag-badge tag-volvo">${(r.type || 'SUPERFAST').toUpperCase()}</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--slate);">${r.route_id}</span>
+            </div>
+
+            <h4 style="font-family:'Fraunces',serif; font-size:16px; color:var(--cream); margin-bottom:3px;">${r.name}</h4>
+            <div style="font-size:11.5px; color:var(--gold); font-family:'IBM Plex Mono',monospace; margin-bottom:8px;">Operator: Kerala State Road Transport</div>
+
+            <div class="route-metrics">
+              <div>
+                <div class="metric-val">${r.distance_km} <span style="font-size:10px;">km</span></div>
+                <div class="metric-lbl">Distance</div>
+              </div>
+              <div>
+                <div class="metric-val">${formatDuration(r.duration_minutes)}</div>
+                <div class="metric-lbl">Est Time</div>
+              </div>
+              <div>
+                <div class="metric-val" style="color:var(--gold);">₹${r.fare_inr}</div>
+                <div class="metric-lbl">Fare</div>
+              </div>
+            </div>
+
+            <div class="stop-timeline">
+              ${fullStops.map(s => `<div class="timeline-node">${s}</div>`).join('')}
+            </div>
+
+            <button onclick="zoomToPlannedRoute(${idx})" class="btn-action" style="padding:11px; font-size:13px; margin-top:10px;">
+              📍 View Full Route on Map
+            </button>
+          </div>
+        `;
+      });
+
+      document.getElementById('routeResultsContainer').innerHTML = html;
+      zoomToPlannedRoute(0);
+    }
+
+    async function zoomToPlannedRoute(idx) {
+      if (!window.currentPlannedRoutes || !window.currentPlannedRoutes[idx]) return;
+      const r = window.currentPlannedRoutes[idx];
+
+      mapLayerGroups.activeRoute.clearLayers();
+      if (activeBusInterval) clearInterval(activeBusInterval);
+
+      const fullStops = [r.origin, ...(r.via || []), r.destination];
+      const waypoints = fullStops.map(name => findStop(name)).filter(s => s !== null);
+
+      if (waypoints.length < 2) return;
+
+      const formattedTime = formatDuration(r.duration_minutes);
+      document.getElementById('simStatusTitle').textContent = `${r.name}`;
+      document.getElementById('simStatusSub').textContent = `Tracing Corridor Road Path • Distance: ${r.distance_km} km • Time: ${formattedTime}`;
+
+      const coordsString = waypoints.map(pt => `${pt.lng},${pt.lat}`).join(';');
+      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`;
+
+      let finalRoadPoints = waypoints.map(w => [w.lat, w.lng]);
+
+      try {
+        const res = await fetch(osrmUrl);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          finalRoadPoints = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        }
+      } catch (err) {
+        console.warn("OSRM direct fallback:", err);
+      }
+
+      // Dark Blue Outer Road Border Casing
+      L.polyline(finalRoadPoints, {
+        color: '#153bb5',
+        weight: 10,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(mapLayerGroups.activeRoute);
+
+      // Google Blue Navigation Centerline
+      const coreRoad = L.polyline(finalRoadPoints, {
+        color: '#3861fb',
+        weight: 6,
+        opacity: 1.0,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(mapLayerGroups.activeRoute);
+
+      // Turn Dots along the route
+      const dotInterval = Math.max(1, Math.floor(finalRoadPoints.length / 12));
+      for (let i = 0; i < finalRoadPoints.length; i += dotInterval) {
+        if (i === 0 || i >= finalRoadPoints.length - 1) continue;
+        const pt = finalRoadPoints[i];
+        const dotIcon = L.divIcon({
+          className: 'route-turn-dot',
+          html: `<div style="width:6px; height:6px; border-radius:50%; background:#ffffff; border:1.5px solid #153bb5;"></div>`,
+          iconSize: [6, 6],
+          iconAnchor: [3, 3]
+        });
+        L.marker(pt, { icon: dotIcon, interactive: false }).addTo(mapLayerGroups.activeRoute);
+      }
+
+      // Origin Pin
+      const startPt = waypoints[0];
+      const endPt = waypoints[waypoints.length - 1];
+
+      const originIcon = L.divIcon({
+        className: 'gmap-origin-wrap',
+        html: `
+          <div style="position:relative;">
+            <div class="gmap-origin-pin"></div>
+            <div class="gmap-origin-label">${startPt.name}</div>
+          </div>
+        `,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+      L.marker([startPt.lat, startPt.lng], { icon: originIcon }).addTo(mapLayerGroups.activeRoute);
+
+      // Destination Pin
+      const destIcon = L.divIcon({
+        className: 'gmap-dest-wrap',
+        html: `
+          <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
+            <svg viewBox="0 0 24 32" width="28" height="36" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45));">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20c0-6.63-5.37-12-12-12z" fill="#EA4335"/>
+              <circle cx="12" cy="11" r="5.5" fill="#ffffff"/>
+              <rect x="8.5" y="10" width="7" height="2" rx="1" fill="#EA4335"/>
+            </svg>
+            <div class="gmap-dest-label">${endPt.name}</div>
+          </div>
+        `,
+        iconSize: [28, 36],
+        iconAnchor: [14, 32]
+      });
+      L.marker([endPt.lat, endPt.lng], { icon: destIcon }).addTo(mapLayerGroups.activeRoute);
+
+      // Single Route Callout Bubble
+      const midPointIdx = Math.floor(finalRoadPoints.length * 0.50);
+      const calloutPt = finalRoadPoints[midPointIdx] || finalRoadPoints[0];
+
+      const calloutIcon = L.divIcon({
+        className: 'gmap-bubble-wrap',
+        html: `
+          <div class="gmap-route-bubble" onclick="map.setView([${calloutPt[0]}, ${calloutPt[1]}], 12)">
+            <div class="gmap-bubble-time">
+              <span>🚌</span> <span>${formattedTime}</span>
+            </div>
+            <div class="gmap-bubble-dist">${r.distance_km} km</div>
+          </div>
+        `,
+        iconSize: [110, 44],
+        iconAnchor: [0, 0]
+      });
+      L.marker(calloutPt, { icon: calloutIcon }).addTo(mapLayerGroups.activeRoute);
+
+      map.fitBounds(coreRoad.getBounds(), { padding: [55, 55], maxZoom: 13, animate: true });
+      setTimeout(() => { if (map) map.invalidateSize(); }, 150);
+
+      animateBus(finalRoadPoints);
+    }
+
+    function animateBus(pts) {
+      if (!pts || pts.length < 2) return;
+
+      const busIcon = L.divIcon({
+        className: 'bus-marker-wrapper',
+        html: `<div class="live-route-bus">🚌</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+
+      activeBusMarker = L.marker(pts[0], { icon: busIcon, zIndexOffset: 1000 }).addTo(mapLayerGroups.activeRoute);
+
+      let step = 0;
+      activeBusInterval = setInterval(() => {
+        step = (step + 1) % pts.length;
+        activeBusMarker.setLatLng(pts[step]);
+      }, 350);
+    }
+
+    function locateUserPosition() {
+      if (!navigator.geolocation) {
+        alert("Geolocation not supported.");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          map.flyTo([pos.coords.latitude, pos.coords.longitude], 13);
+          L.circleMarker([pos.coords.latitude, pos.coords.longitude], { radius: 10, color: '#fff', fillColor: '#3861fb', fillOpacity: 1 }).addTo(map).bindPopup('📍 You are here').openPopup();
+        },
+        () => map.flyTo([9.55, 76.45], 10)
+      );
+    }
+  </script>
+</body>
+</html>
